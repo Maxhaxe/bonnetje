@@ -231,3 +231,43 @@
   margin-top: 4px;
   font-family: var(--font-mono);
 }
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+
+  .meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .badges {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .totalPill {
+    width: 100%;
+    justify-content: center;
+    padding: 8px var(--space-md);
+  }
+
+  .card {
+    padding: var(--space-md);
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .totalsGrid {
+    width: 100%;
+    min-width: 0;
+  }
+}

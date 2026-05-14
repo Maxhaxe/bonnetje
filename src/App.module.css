@@ -556,10 +556,86 @@
   margin-bottom: var(--space-md);
 }
 
-/* Responsive */
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+  .navInner {
+    height: auto;
+    padding: var(--space-md) var(--space-lg);
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .tabs {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .mainLayout {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .contentArea {
+    width: 100%;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+    order: -1; /* Show people at the top on mobile */
+    padding: var(--space-md);
+  }
+
+  .peopleList {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: var(--space-xs);
+    gap: var(--space-md);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .peopleList::-webkit-scrollbar {
+    display: none;
+  }
+
+  .personSlot {
+    flex-shrink: 0;
+    min-width: 150px;
+    padding: 10px;
+  }
+
+  .personSlotActive {
+    transform: translateY(-4px);
+  }
+
+  .sidebarTip {
+    display: none;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroSub {
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 600px) {
-  .navInner { gap: var(--space-md); padding: 0 var(--space-md); }
-  .logoText { display: none; }
-  .settingsBtn span { display: none; }
-  .main { padding: var(--space-lg) var(--space-md); }
+  .logoText {
+    display: none;
+  }
+  
+  .heroTitle {
+    font-size: 1.75rem;
+  }
+
+  .main {
+    padding: var(--space-lg) var(--space-md);
+  }
 }

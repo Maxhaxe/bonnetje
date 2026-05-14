@@ -93,18 +93,25 @@
 .bars {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: var(--space-md);
 }
 
 .barRow {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 100px 1fr 60px;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-md);
+}
+
+@media (max-width: 600px) {
+  .barRow {
+    grid-template-columns: 80px 1fr 50px;
+    gap: var(--space-sm);
+  }
 }
 
 .barLabel {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -112,7 +119,7 @@
 }
 
 .barTrack {
-  height: 6px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -126,7 +133,7 @@
 }
 
 .barAmount {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-family: var(--font-mono);
   font-weight: 600;
   color: var(--text-primary);
