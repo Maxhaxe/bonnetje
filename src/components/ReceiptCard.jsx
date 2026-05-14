@@ -55,7 +55,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
 
         <div className={styles.headerRight}>
           <div className={styles.totalPill}>
-            <span className={styles.totalLabel}>Total</span>
+            <span className={styles.totalLabel}>Totaal</span>
             <span className={styles.totalAmount}>{formatCurrency(receipt.total, currency)}</span>
           </div>
           <CardBadge cardString={receipt.payment_card} small />
@@ -64,7 +64,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             <button
               className="btn btn-ghost btn-icon btn-sm"
               onClick={() => setShowImage(v => !v)}
-              data-tooltip="View receipt photo"
+              data-tooltip="Bekijk bon foto"
               id={`toggle-image-${receipt.id}`}
             >
               <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -77,7 +77,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             className="btn btn-ghost btn-icon btn-sm"
             onClick={() => setExpanded(v => !v)}
             id={`toggle-receipt-${receipt.id}`}
-            data-tooltip={expanded ? 'Collapse' : 'Expand'}
+            data-tooltip={expanded ? 'Inklappen' : 'Uitklappen'}
           >
             <svg
               width="15" height="15" fill="none" viewBox="0 0 24 24"
@@ -92,7 +92,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             className="btn btn-ghost btn-icon btn-sm"
             onClick={() => onDelete(receipt.id)}
             id={`delete-receipt-${receipt.id}`}
-            data-tooltip="Delete receipt"
+            data-tooltip="Verwijder bonnetje"
             style={{ color: 'var(--accent-danger)' }}
           >
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,7 +105,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
       {/* Receipt image */}
       {showImage && receipt.imageUrl && (
         <div className={styles.imageWrapper}>
-          <img src={receipt.imageUrl} alt="Receipt" className={styles.receiptImage} />
+          <img src={receipt.imageUrl} alt="Bonnetje" className={styles.receiptImage} />
         </div>
       )}
 
@@ -116,10 +116,10 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             <table className={styles.table}>
               <thead>
                 <tr className={styles.tableHead}>
-                  <th>Item</th>
-                  <th style={{ textAlign: 'center' }}>Qty</th>
-                  <th style={{ textAlign: 'right' }}>Unit Price</th>
-                  <th style={{ textAlign: 'right' }}>Total</th>
+                  <th>Product</th>
+                  <th style={{ textAlign: 'center' }}>Aantal</th>
+                  <th style={{ textAlign: 'right' }}>Prijs p/s</th>
+                  <th style={{ textAlign: 'right' }}>Totaal</th>
                   <th style={{ textAlign: 'center' }}>Product Link</th>
                   <th></th>
                 </tr>
@@ -140,7 +140,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
           {/* Footer totals */}
           <div className={styles.footer}>
             <div className={styles.footerLeft}>
-              <span className={styles.itemCount}>{receipt.items?.length || 0} items</span>
+              <span className={styles.itemCount}>{receipt.items?.length || 0} producten</span>
               {receipt.store_domain && (
                 <a
                   href={`https://${receipt.store_domain}`}
@@ -159,18 +159,18 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             <div className={styles.totalsGrid}>
               {receipt.discount > 0 && (
                 <div className={styles.totalsRow}>
-                  <span>Discount</span>
+                  <span>Korting</span>
                   <span className="text-success">−{formatCurrency(receipt.discount, currency)}</span>
                 </div>
               )}
               {receipt.tax > 0 && (
                 <div className={styles.totalsRow}>
-                  <span>Tax</span>
+                  <span>BTW</span>
                   <span>{formatCurrency(receipt.tax, currency)}</span>
                 </div>
               )}
               <div className={`${styles.totalsRow} ${styles.grandTotal}`}>
-                <span>Grand Total</span>
+                <span>Totaalbedrag</span>
                 <span>{formatCurrency(receipt.total, currency)}</span>
               </div>
             </div>

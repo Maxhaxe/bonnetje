@@ -25,6 +25,7 @@ export default function SettingsModal({ apiKey, onSave, onClose }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Settings
+            Instellingen
           </h2>
           <button
             className="btn btn-ghost btn-icon btn-sm"
@@ -42,10 +43,10 @@ export default function SettingsModal({ apiKey, onSave, onClose }) {
         <div className={styles.body}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="api-key-input">
-              Gemini API Key
+              Gemini API Sleutel
             </label>
             <p className={styles.desc}>
-              Used for receipt OCR and product link generation. Stored locally in your browser only.
+              Gebruikt voor het scannen van bonnen en het genereren van productlinks. Wordt alleen lokaal in je browser opgeslagen.
             </p>
             <div className={styles.keyRow}>
               <input
@@ -62,7 +63,7 @@ export default function SettingsModal({ apiKey, onSave, onClose }) {
                 className="btn btn-ghost btn-icon"
                 onClick={() => setVisible(v => !v)}
                 id="toggle-key-visibility-btn"
-                data-tooltip={visible ? 'Hide key' : 'Show key'}
+                data-tooltip={visible ? 'Sleutel verbergen' : 'Sleutel tonen'}
                 type="button"
               >
                 {visible ? (
@@ -84,19 +85,19 @@ export default function SettingsModal({ apiKey, onSave, onClose }) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
             </svg>
             <span>
-              Get a free key at{' '}
+              Vraag een gratis sleutel aan op{' '}
               <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">
                 aistudio.google.com
               </a>
-              . Free tier: 15 requests/minute.
+              . Gratis versie: 15 verzoeken per minuut.
             </span>
           </div>
         </div>
 
         <div className={styles.footer}>
-          <button className="btn btn-ghost" onClick={onClose} id="cancel-settings-btn">Cancel</button>
+          <button className="btn btn-ghost" onClick={onClose} id="cancel-settings-btn">Annuleren</button>
           <button className="btn btn-primary" onClick={handleSave} id="save-settings-btn">
-            Save Settings
+            Instellingen Opslaan
           </button>
         </div>
       </div>

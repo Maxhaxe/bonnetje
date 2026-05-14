@@ -159,6 +159,7 @@ export function useReceipts() {
     updateItem, 
     deleteReceipt, 
     clearAll, 
+    checkDuplicate,
     totals 
   };
 }

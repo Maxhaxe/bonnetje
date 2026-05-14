@@ -131,12 +131,12 @@ export default function App() {
             <span className={styles.logoText}>Bonnetje</span>
           </div>
 
-          <nav className={styles.tabs} aria-label="Main navigation">
+          <nav className={styles.tabs} aria-label="Hoofdnavigatie">
             <button
               className={`${styles.tab} ${activeTab === 'receipts' ? styles.tabActive : ''}`}
               onClick={() => setActiveTab('receipts')}
             >
-              Receipts
+              Bonnetjes
               {receipts.length > 0 && (
                 <span className={styles.badge}>{receipts.length}</span>
               )}
@@ -153,7 +153,7 @@ export default function App() {
             className={`btn btn-ghost btn-sm ${styles.settingsBtn}`}
             onClick={() => setSettingsOpen(true)}
           >
-            Settings
+            Instellingen
           </button>
         </div>
       </header>
@@ -165,15 +165,15 @@ export default function App() {
               {receipts.length === 0 && activeTab === 'receipts' && (
                 <div className={styles.hero}>
                   <div className={styles.heroBadge}>
-                    <span>✨</span> Powered by Gemini 2.5 Pro
+                    <span>✨</span> Aangedreven door Gemini 2.5 Pro
                   </div>
                   <h1 className={styles.heroTitle}>
-                    Turn receipts into<br />
-                    <span className={styles.heroGradient}>structured data</span>
+                    Zet bonnetjes om in<br />
+                    <span className={styles.heroGradient}>gestructureerde data</span>
                   </h1>
                   <p className={styles.heroSub}>
-                    Upload a photo of any receipt. Bonnetje automatically extracts every item,
-                    price, and payment card.
+                    Upload een foto van elk bonnetje. Bonnetje haalt automatisch elk item,
+                    de prijs en de betaalpas informatie eruit.
                   </p>
                 </div>
               )}
@@ -184,7 +184,7 @@ export default function App() {
                     <div className={styles.batchBanner}>
                       <div className={styles.batchSpinner} />
                       <div className={styles.batchInfo}>
-                        <p className={styles.batchText}>Processing batch: {batchProgress.current} of {batchProgress.total} receipts...</p>
+                        <p className={styles.batchText}>Batch verwerken: {batchProgress.current} van {batchProgress.total} bonnetjes...</p>
                         <div className={styles.progressBar}>
                           <div 
                             className={styles.progressFill} 
@@ -209,9 +209,9 @@ export default function App() {
                 receipts.length === 0 ? (
                   <div className={styles.emptyState}>
                     <p className={styles.emptyIcon}>📊</p>
-                    <p className={styles.emptyTitle}>No data yet</p>
+                    <p className={styles.emptyTitle}>Nog geen gegevens</p>
                     <button className="btn btn-primary" onClick={() => setActiveTab('receipts')}>
-                      Upload a Receipt
+                      Upload een bonnetje
                     </button>
                   </div>
                 ) : (
@@ -225,14 +225,14 @@ export default function App() {
                     <h2 className={styles.listTitle}>
                       {selectedPersonId ? (
                         <>
-                          Receipts for <span className={styles.filterPersonName}>{people.find(p => p.id === selectedPersonId)?.name}</span>
+                          Bonnetjes voor <span className={styles.filterPersonName}>{people.find(p => p.id === selectedPersonId)?.name}</span>
                         </>
-                      ) : 'Processed Receipts'}
+                      ) : 'Verwerkte Bonnetjes'}
                       <span className={styles.listCount}>{displayReceipts.length}</span>
                     </h2>
                     {selectedPersonId && (
                       <button className="btn btn-ghost btn-sm" onClick={() => setSelectedPersonId(null)}>
-                        Clear Filter
+                        Filter wissen
                       </button>
                     )}
                   </div>
@@ -251,8 +251,8 @@ export default function App() {
                     ))}
                     {displayReceipts.length === 0 && (
                       <div className={styles.emptyFilter}>
-                        <p>No receipts attached to this person yet.</p>
-                        <p className={styles.emptyFilterTip}>Drag a receipt here or drop it on their name to link it.</p>
+                        <p>Nog geen bonnetjes gekoppeld aan deze persoon.</p>
+                        <p className={styles.emptyFilterTip}>Sleep een bonnetje hierheen of drop het op de naam om te koppelen.</p>
                       </div>
                     )}
                   </div>
