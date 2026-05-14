@@ -1,0 +1,30 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-full);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.small {
+  padding: 4px 10px;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+}
+
+.label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.small .label {
+  font-size: 0.75rem;
+}
