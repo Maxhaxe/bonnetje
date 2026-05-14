@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
+import { formatCurrency } from './utils/formatters.js';
 import styles from './App.module.css';
 
 const DEFAULT_API_KEY = 'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U';
@@ -293,8 +294,10 @@ export default function App() {
                 >
                   <div className={styles.personAvatar}>📋</div>
                   <div className={styles.personInfo}>
-                    <span className={styles.personName}>All Receipts</span>
-                    <span className={styles.personCount}>{receipts.length} total</span>
+                    <span className={styles.personName}>Alle Bonnetjes</span>
+                    <span className={styles.personCount}>
+                      {receipts.length} in totaal · <strong>{formatCurrency(totals.grandTotal)}</strong>
+                    </span>
                   </div>
                 </div>
 
@@ -310,7 +313,7 @@ export default function App() {
                     <div className={styles.personInfo}>
                       <span className={styles.personName}>{person.name}</span>
                       <span className={styles.personCount}>
-                        {receipts.filter(r => r.personId === person.id).length} receipts
+                        {receipts.filter(r => r.personId === person.id).length} bonnetjes · <strong>{formatCurrency(totals.byPerson[person.id] || 0)}</strong>
                       </span>
                     </div>
                     {person.id !== 'p1' && (
@@ -318,10 +321,12 @@ export default function App() {
                         className={styles.personDelete} 
                         onClick={(e) => {
                           e.stopPropagation();
-                          deletePerson(person.id);
-                          if (selectedPersonId === person.id) setSelectedPersonId(null);
+                          if (confirm(`Weet je zeker dat je ${person.name} wilt verwijderen?`)) {
+                            deletePerson(person.id);
+                            if (selectedPersonId === person.id) setSelectedPersonId(null);
+                          }
                         }}
-                        title="Remove person"
+                        title="Persoon verwijderen"
                       >
                         ✕
                       </button>

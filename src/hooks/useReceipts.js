@@ -145,6 +145,11 @@ export function useReceipts() {
       acc[key] = (acc[key] || 0) + (r.total || 0);
       return acc;
     }, {}),
+    byPerson: receipts.reduce((acc, r) => {
+      const key = r.personId || 'unassigned';
+      acc[key] = (acc[key] || 0) + (r.total || 0);
+      return acc;
+    }, {}),
   };
 
   return { 
