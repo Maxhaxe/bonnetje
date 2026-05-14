@@ -12,9 +12,16 @@ export default function UploadZone({ onUpload, loading }) {
 
   const handleFiles = (fileList) => {
     if (!fileList || fileList.length === 0) return;
-    const validFiles = Array.from(fileList).filter(f => ACCEPTED.includes(f.type));
+    
+    const validFiles = Array.from(fileList).filter(f => {
+      if (ACCEPTED.includes(f.type)) return true;
+      // Fallback for files with missing MIME types (common on some mobile browsers)
+      const ext = f.name.split('.').pop().toLowerCase();
+      return ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'].includes(ext);
+    });
+
     if (validFiles.length === 0) {
-      alert('Please upload JPEG, PNG, WebP, or HEIC images.');
+      alert('Upload a.u.b. een geldige afbeelding (JPEG, PNG, WebP of HEIC).');
       return;
     }
     const newPreviews = validFiles.map(f => URL.createObjectURL(f));
