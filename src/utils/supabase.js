@@ -57,3 +57,31 @@ export async function fetchFromSupabase() {
     return null;
   }
 }
+
+export async function uploadReceiptImage(file) {
+  if (!supabase) return null;
+
+  try {
+    const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
+    const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error } = await supabase.storage
+      .from('receipts')
+      .upload(filePath, file);
+
+    if (error) {
+      console.error('Error uploading image to Supabase:', error);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('receipts')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (err) {
+    console.error('Unexpected error uploading to Supabase:', err);
+    return null;
+  }
+}
