@@ -186,6 +186,8 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
           </svg>
           <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Bonnetje wordt gescand met AI...</span>
         </div>
+      )}
+
       {/* Error State */}
       {expanded && receipt.status === 'error' && (
         <div className={styles.body} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', gap: '1rem', color: 'var(--accent-danger)' }}>
