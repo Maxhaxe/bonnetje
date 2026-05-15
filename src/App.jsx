@@ -14,9 +14,18 @@ const DEFAULT_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const LS_KEY = 'bonnetje_apikey';
 const LS_SB_URL = 'bonnetje_sb_url';
 const LS_SB_KEY = 'bonnetje_sb_key';
+const LS_SERVER_SCAN = 'bonnetje_server_scan';
 
 const DEFAULT_SB_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const DEFAULT_SB_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+function loadServerScanPref() {
+  try {
+    return localStorage.getItem(LS_SERVER_SCAN) !== 'false';
+  } catch {
+    return true;
+  }
+}
 
 function loadApiKey() {
   const OLD_KEYS = [
@@ -59,6 +68,7 @@ export default function App() {
   const [{ url: initialSbUrl, key: initialSbKey }] = useState(loadSbConfig);
   const [supabaseUrl, setSupabaseUrl] = useState(initialSbUrl);
   const [supabaseKey, setSupabaseKey] = useState(initialSbKey);
+  const [useServerSideScanning, setUseServerSideScanning] = useState(loadServerScanPref);
   
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [manualModalOpen, setManualModalOpen] = useState(false);
@@ -90,19 +100,22 @@ export default function App() {
     totals 
   } = useReceipts();
   
-  const { extractReceipt, loading } = useGemini(apiKey);
+  const { extractReceipt, loading } = useGemini(apiKey, useServerSideScanning);
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const handleSaveSettings = (newKey, newUrl, newKeySb) => {
+  const handleSaveSettings = (newKey, newUrl, newKeySb, newServerScan) => {
     setApiKey(newKey);
     saveApiKey(newKey);
     
     setSupabaseUrl(newUrl);
     setSupabaseKey(newKeySb);
+    setUseServerSideScanning(newServerScan);
+    
     try {
       localStorage.setItem(LS_SB_URL, newUrl);
       localStorage.setItem(LS_SB_KEY, newKeySb);
+      localStorage.setItem(LS_SERVER_SCAN, newServerScan ? 'true' : 'false');
     } catch {}
 
     if (newUrl && newKeySb) {
@@ -409,6 +422,7 @@ export default function App() {
           apiKey={apiKey}
           supabaseUrl={supabaseUrl}
           supabaseKey={supabaseKey}
+          useServerSideScanning={useServerSideScanning}
           receipts={receipts}
           people={people}
           onSave={handleSaveSettings}

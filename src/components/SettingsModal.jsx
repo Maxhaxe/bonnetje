@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import styles from './SettingsModal.module.css';
 
-export default function SettingsModal({ apiKey, supabaseUrl, supabaseKey, receipts, people, onSave, onImport, onClose }) {
+export default function SettingsModal({ apiKey, supabaseUrl, supabaseKey, useServerSideScanning, receipts, people, onSave, onImport, onClose }) {
   const [key, setKey] = useState(apiKey || '');
   const [sbUrl, setSbUrl] = useState(supabaseUrl || '');
   const [sbKey, setSbKey] = useState(supabaseKey || '');
+  const [serverScan, setServerScan] = useState(useServerSideScanning);
   const [visible, setVisible] = useState(false);
   const [sbVisible, setSbVisible] = useState(false);
 
   const handleSave = () => {
-    onSave(key.trim(), sbUrl.trim(), sbKey.trim());
+    onSave(key.trim(), sbUrl.trim(), sbKey.trim(), serverScan);
     onClose();
   };
 
@@ -82,6 +83,22 @@ export default function SettingsModal({ apiKey, supabaseUrl, supabaseKey, receip
                 )}
               </button>
             </div>
+          </div>
+
+          {/* Server-side Scanning Option */}
+          <div className={styles.field}>
+            <label className={styles.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={serverScan}
+                onChange={(e) => setServerScan(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              Via de server scannen (Aanbevolen)
+            </label>
+            <p className={styles.desc}>
+              Indien ingeschakeld, worden bonnen naar onze server gestuurd voor veilig scannen. Hiermee blijft je API sleutel geheim en voorkom je netwerkfouten in de browser.
+            </p>
           </div>
 
           <div className={styles.infoBox}>

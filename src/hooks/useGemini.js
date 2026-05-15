@@ -170,7 +170,7 @@ function parseJSON(text) {
   }
 }
 
-export function useGemini(apiKey) {
+export function useGemini(apiKey, useServerSideScanning = true) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -179,49 +179,75 @@ export function useGemini(apiKey) {
    * Returns a receipt object ready to store.
    */
   const extractReceipt = useCallback(async (imageFile) => {
-    if (!apiKey) throw new Error('No Gemini API key configured. Open Settings to add one.');
+    // If not using server-side, require API key on client
+    if (!useServerSideScanning && !apiKey) throw new Error('No Gemini API key configured. Open Settings to add one.');
+    
     setLoading(true);
     setError(null);
 
     try {
       const base64 = await fileToBase64(imageFile);
       const mimeType = imageFile.type || 'image/jpeg';
-      const prompt = buildReceiptPrompt();
-      const rawText = await geminiVision(apiKey, base64, mimeType, prompt);
+      let receiptData;
 
-      const receiptData = parseJSON(rawText);
+      if (useServerSideScanning) {
+        // Send to our Cloudflare Pages API
+        const res = await fetch('/api/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: base64,
+            mimeType,
+            clientApiKey: apiKey // Provide it just in case the server needs a fallback
+          })
+        });
 
-      // Now generate product links for each item
-      const items = await Promise.all(
-        (receiptData.items || []).map(async (item) => {
-          let link = null;
-          try {
-            if (apiKey) {
-                const linkPrompt = buildProductLinkPrompt(
-                  item.name,
-                  receiptData.store || '',
-                  receiptData.store_domain || null,
-                  item.id || null, // Article number from receipt
-                );
-                const linkText = await geminiText(apiKey, linkPrompt);
-                const linkData = parseJSON(linkText);
-                link = resolveBestLink(linkData, item.name, receiptData.store || '', receiptData.store_domain || null);
+        if (!res.ok) {
+          let errData;
+          try { errData = await res.json(); } catch(e) {}
+          throw new Error((errData && errData.error) || `Server error: ${res.status}`);
+        }
+
+        receiptData = await res.json();
+      } else {
+        // Client-side scanning (Legacy)
+        const prompt = buildReceiptPrompt();
+        const rawText = await geminiVision(apiKey, base64, mimeType, prompt);
+        receiptData = parseJSON(rawText);
+
+        // Generate product links for each item
+        const items = await Promise.all(
+          (receiptData.items || []).map(async (item) => {
+            let link = null;
+            try {
+              if (apiKey) {
+                  const linkPrompt = buildProductLinkPrompt(
+                    item.name,
+                    receiptData.store || '',
+                    receiptData.store_domain || null,
+                    item.id || null, // Article number from receipt
+                  );
+                  const linkText = await geminiText(apiKey, linkPrompt);
+                  const linkData = parseJSON(linkText);
+                  link = resolveBestLink(linkData, item.name, receiptData.store || '', receiptData.store_domain || null);
+              }
+            } catch {
+              // Fallback silently
             }
-          } catch {
-            // Fallback silently
-          }
-          if (!link) {
-            link = { url: buildSearchUrl(item.name, receiptData.store || ''), type: 'search' };
-          }
-          return { ...item, id: uid(), link };
-        }),
-      );
+            if (!link) {
+              link = { url: buildSearchUrl(item.name, receiptData.store || ''), type: 'search' };
+            }
+            return { ...item, id: uid(), link };
+          }),
+        );
+        receiptData.items = items;
+      }
 
       return {
-        id: uid(),
+        id: receiptData.id || uid(),
         store: receiptData.store || 'Unknown Store',
         date: receiptData.date || null,
-        items,
+        items: receiptData.items || [],
         subtotal: receiptData.subtotal || 0,
         discount: receiptData.discount || 0,
         tax: receiptData.tax || 0,
@@ -236,14 +262,14 @@ export function useGemini(apiKey) {
     } catch (err) {
       let msg = err.message;
       if (msg.toLowerCase().includes('quota') || msg.includes('429')) {
-        msg = "API Quota Exceeded. You have reached the free tier limit for the current API key. Please open Settings to enter a new key, or try again later.";
+        msg = "API Quota Exceeded. You have reached the free tier limit. Please check your API key or try again later.";
       }
       setError(msg);
       throw new Error(msg);
     } finally {
       setLoading(false);
     }
-  }, [apiKey]);
+  }, [apiKey, useServerSideScanning]);
 
   return { extractReceipt, loading, error };
 }
