@@ -9,7 +9,7 @@ import { formatCurrency } from './utils/formatters.js';
 import { initSupabase } from './utils/supabase.js';
 import styles from './App.module.css';
 
-const DEFAULT_API_KEY = 'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U';
+const DEFAULT_API_KEY = 'AIzaSyAfRlwIhY2tx0hrNRpSrsmU2SUHhxc59_c';
 const LS_KEY = 'bonnetje_apikey';
 const LS_SB_URL = 'bonnetje_sb_url';
 const LS_SB_KEY = 'bonnetje_sb_key';
