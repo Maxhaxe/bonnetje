@@ -3,7 +3,7 @@ import { GEMINI_VISION_MODEL, GEMINI_TEXT_MODEL, buildReceiptPrompt, buildProduc
 import { resolveBestLink, buildSearchUrl } from '../utils/linkGenerator.js';
 import { uid } from '../utils/formatters.js';
 
-const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1/models';
 
 const RECEIPT_SCHEMA = {
   type: 'object',
