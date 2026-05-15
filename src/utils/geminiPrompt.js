@@ -1,7 +1,7 @@
-// Gemini Vision model (Pro for accuracy and long receipts)
-export const GEMINI_VISION_MODEL = 'gemini-2.5-pro';
+// Gemini Vision model (Flash for speed and higher quota)
+export const GEMINI_VISION_MODEL = 'gemini-1.5-flash';
 // Gemini Text model (Flash for speed)
-export const GEMINI_TEXT_MODEL = 'gemini-2.5-flash';
+export const GEMINI_TEXT_MODEL = 'gemini-1.5-flash';
 
 export function buildReceiptPrompt() {
   return `You are an expert, highly precise receipt parser. Analyze the provided receipt image carefully and extract all information. The image might be crumpled, blurry, or at an angle—use your best OCR capabilities to read the text.

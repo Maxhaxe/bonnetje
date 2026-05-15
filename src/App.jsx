@@ -10,23 +10,24 @@ import { formatCurrency } from './utils/formatters.js';
 import { initSupabase } from './utils/supabase.js';
 import styles from './App.module.css';
 
-const DEFAULT_API_KEY = 'AIzaSyA4twX-b_eHM6nka7l-Iv6Bc4D5soYjh6M';
+const DEFAULT_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const LS_KEY = 'bonnetje_apikey';
 const LS_SB_URL = 'bonnetje_sb_url';
 const LS_SB_KEY = 'bonnetje_sb_key';
 
-const DEFAULT_SB_URL = 'https://joummsvaeprtzbpizdtl.supabase.co';
-const DEFAULT_SB_KEY = 'sb_publishable_zKbYN3ekzmiBT_S-G-Dt3w_eOxDXq3x';
+const DEFAULT_SB_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const DEFAULT_SB_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 function loadApiKey() {
   const OLD_KEYS = [
     'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U',
-    'AIzaSyAfRlwIhY2tx0hrNRpSrsmU2SUHhxc59_c'
+    'AIzaSyAfRlwIhY2tx0hrNRpSrsmU2SUHhxc59_c',
+    'AIzaSyA4twX-b_eHM6nka7l-Iv6Bc4D5soYjh6M'
   ];
   
   try {
     const saved = localStorage.getItem(LS_KEY);
-    // Als er geen opgeslagen sleutel is, of het is een oude standaard sleutel, gebruik de nieuwe
+    // Als er geen opgeslagen sleutel is, of het is een oude standaard sleutel, gebruik de nieuwe default
     if (!saved || OLD_KEYS.includes(saved)) {
       return DEFAULT_API_KEY;
     }
