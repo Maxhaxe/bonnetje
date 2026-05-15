@@ -67,9 +67,7 @@ async function geminiText(apiKey, prompt) {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: { 
       temperature: 0.1, 
-      maxOutputTokens: 1024, 
-      responseMimeType: 'application/json',
-      responseSchema: LINK_SCHEMA 
+      maxOutputTokens: 1024
     },
   };
   const res = await fetch(url, {
@@ -111,9 +109,7 @@ async function geminiVision(apiKey, imageBase64, mimeType, prompt) {
     }],
     generationConfig: { 
       temperature: 0.1, 
-      maxOutputTokens: 8192, 
-      responseMimeType: 'application/json',
-      responseSchema: RECEIPT_SCHEMA 
+      maxOutputTokens: 8192
     },
   };
   const res = await fetch(url, {
