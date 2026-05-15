@@ -10,7 +10,7 @@ import { formatCurrency } from './utils/formatters.js';
 import { initSupabase } from './utils/supabase.js';
 import styles from './App.module.css';
 
-const DEFAULT_API_KEY = 'AIzaSyAfRlwIhY2tx0hrNRpSrsmU2SUHhxc59_c';
+const DEFAULT_API_KEY = 'AIzaSyA4twX-b_eHM6nka7l-Iv6Bc4D5soYjh6M';
 const LS_KEY = 'bonnetje_apikey';
 const LS_SB_URL = 'bonnetje_sb_url';
 const LS_SB_KEY = 'bonnetje_sb_key';
@@ -21,7 +21,7 @@ const DEFAULT_SB_KEY = 'sb_publishable_zKbYN3ekzmiBT_S-G-Dt3w_eOxDXq3x';
 function loadApiKey() {
   const OLD_KEYS = [
     'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U',
-    // voeg hier meer oude sleutels toe indien nodig
+    'AIzaSyAfRlwIhY2tx0hrNRpSrsmU2SUHhxc59_c'
   ];
   
   try {
