@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllFromStore, saveToStore } from '../utils/db.js';
+import { fetchFromSupabase, syncToSupabase } from '../utils/supabase.js';
 
 const STORAGE_KEY = 'bonnetje_receipts';
 const PEOPLE_KEY = 'bonnetje_people';
@@ -17,6 +18,19 @@ export function useReceipts() {
   useEffect(() => {
     async function initData() {
       try {
+        // 1. Try cloud first
+        const cloudData = await fetchFromSupabase();
+        if (cloudData) {
+          console.log('Syncing from Supabase...');
+          setReceipts(cloudData.receipts || []);
+          setPeople(cloudData.people || DEFAULT_PEOPLE);
+          await saveToStore('receipts', cloudData.receipts || []);
+          await saveToStore('people', cloudData.people || DEFAULT_PEOPLE);
+          setIsLoaded(true);
+          return;
+        }
+
+        // 2. Try IndexedDB
         const dbReceipts = await getAllFromStore('receipts');
         const dbPeople = await getAllFromStore('people');
 
@@ -62,7 +76,7 @@ export function useReceipts() {
     initData();
   }, []);
 
-  // Persistence effects
+  // Persistence effects (Local)
   useEffect(() => {
     if (isLoaded) {
       saveToStore('receipts', receipts);
@@ -74,6 +88,16 @@ export function useReceipts() {
       saveToStore('people', people);
     }
   }, [people, isLoaded]);
+
+  // Persistence effect (Cloud)
+  useEffect(() => {
+    if (isLoaded) {
+      const timer = setTimeout(() => {
+        syncToSupabase(receipts, people);
+      }, 2000); // Debounce sync to avoid spamming
+      return () => clearTimeout(timer);
+    }
+  }, [receipts, people, isLoaded]);
 
   const addPerson = useCallback((name) => {
     const newPerson = { id: `p_${Date.now()}`, name, avatar: '👤' };
@@ -156,6 +180,8 @@ export function useReceipts() {
     receipts, 
     people, 
     isLoaded,
+    setReceipts,
+    setPeople,
     addPerson, 
     deletePerson,
     assignPerson, 

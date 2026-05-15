@@ -6,16 +6,30 @@ import SettingsModal from './components/SettingsModal.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
 import { formatCurrency } from './utils/formatters.js';
+import { initSupabase } from './utils/supabase.js';
 import styles from './App.module.css';
 
 const DEFAULT_API_KEY = 'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U';
 const LS_KEY = 'bonnetje_apikey';
+const LS_SB_URL = 'bonnetje_sb_url';
+const LS_SB_KEY = 'bonnetje_sb_key';
 
 function loadApiKey() {
   try {
     return localStorage.getItem(LS_KEY) || DEFAULT_API_KEY;
   } catch {
     return DEFAULT_API_KEY;
+  }
+}
+
+function loadSbConfig() {
+  try {
+    return {
+      url: localStorage.getItem(LS_SB_URL) || '',
+      key: localStorage.getItem(LS_SB_KEY) || ''
+    };
+  } catch {
+    return { url: '', key: '' };
   }
 }
 
@@ -27,6 +41,10 @@ function saveApiKey(key) {
 
 export default function App() {
   const [apiKey, setApiKey] = useState(loadApiKey);
+  const [{ url: initialSbUrl, key: initialSbKey }] = useState(loadSbConfig);
+  const [supabaseUrl, setSupabaseUrl] = useState(initialSbUrl);
+  const [supabaseKey, setSupabaseKey] = useState(initialSbKey);
+  
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('receipts');
   const [extractError, setExtractError] = useState(null);
@@ -34,6 +52,12 @@ export default function App() {
   const [isAddingPerson, setIsAddingPerson] = useState(false);
   const [newPersonName, setNewPersonName] = useState('');
   const [selectedPersonId, setSelectedPersonId] = useState(null);
+
+  useEffect(() => {
+    if (supabaseUrl && supabaseKey) {
+      initSupabase(supabaseUrl, supabaseKey);
+    }
+  }, [supabaseUrl, supabaseKey]);
 
   const { 
     receipts, 
@@ -54,9 +78,20 @@ export default function App() {
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const handleApiKeySave = (key) => {
-    setApiKey(key);
-    saveApiKey(key);
+  const handleSaveSettings = (newKey, newUrl, newKeySb) => {
+    setApiKey(newKey);
+    saveApiKey(newKey);
+    
+    setSupabaseUrl(newUrl);
+    setSupabaseKey(newKeySb);
+    try {
+      localStorage.setItem(LS_SB_URL, newUrl);
+      localStorage.setItem(LS_SB_KEY, newKeySb);
+    } catch {}
+
+    if (newUrl && newKeySb) {
+      initSupabase(newUrl, newKeySb);
+    }
   };
 
   const handleSubmitPerson = (e) => {
@@ -345,7 +380,15 @@ export default function App() {
       {settingsOpen && (
         <SettingsModal
           apiKey={apiKey}
-          onSave={handleApiKeySave}
+          supabaseUrl={supabaseUrl}
+          supabaseKey={supabaseKey}
+          receipts={receipts}
+          people={people}
+          onSave={handleSaveSettings}
+          onImport={(importedReceipts, importedPeople) => {
+            setReceipts(importedReceipts);
+            setPeople(importedPeople);
+          }}
           onClose={() => setSettingsOpen(false)}
         />
       )}
