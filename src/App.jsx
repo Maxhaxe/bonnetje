@@ -154,9 +154,10 @@ export default function App() {
       
       let placeholderId = null;
       try {
-        // 1. Upload to Supabase first
+        // 1. Upload to Supabase first (only permanent URLs allowed, never blob: URLs)
         const publicUrl = await uploadReceiptImage(file);
-        const finalImageUrl = publicUrl || URL.createObjectURL(file);
+        // For local display in THIS session only, create a blob URL (not stored)
+        const localBlobUrl = URL.createObjectURL(file);
 
         // 2. Create Placeholder
         placeholderId = uid();
@@ -164,7 +165,8 @@ export default function App() {
           id: placeholderId,
           store: 'Verwerken...',
           status: 'processing',
-          imageUrl: finalImageUrl,
+          // Only use permanent URL for storage; blob URL is shown locally and discarded on refresh
+          imageUrl: publicUrl || localBlobUrl,
           date: new Date().toISOString().split('T')[0],
           items: [],
           subtotal: 0,

@@ -59,29 +59,33 @@ export async function fetchFromSupabase() {
 }
 
 export async function uploadReceiptImage(file) {
-  if (!supabase) return null;
+  if (!supabase) {
+    console.warn('Supabase not initialized — foto wordt niet permanent opgeslagen. Voeg Supabase-instellingen toe.');
+    return null;
+  }
 
   try {
     const fileExt = file.name ? file.name.split('.').pop() : 'jpg';
     const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+    const filePath = fileName;
 
     const { error } = await supabase.storage
       .from('receipts')
-      .upload(filePath, file);
+      .upload(filePath, file, { upsert: false, cacheControl: '3600' });
 
     if (error) {
-      console.error('Error uploading image to Supabase:', error);
+      console.error('[Supabase Storage] Upload fout:', error.message, '— Controleer of de bucket "receipts" bestaat en Public is.');
       return null;
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    const { data } = supabase.storage
       .from('receipts')
       .getPublicUrl(filePath);
 
-    return publicUrl;
+    console.log('[Supabase Storage] Upload gelukt:', data.publicUrl);
+    return data.publicUrl;
   } catch (err) {
-    console.error('Unexpected error uploading to Supabase:', err);
+    console.error('[Supabase Storage] Onverwachte fout:', err);
     return null;
   }
 }
