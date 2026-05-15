@@ -360,6 +360,11 @@ export default function App() {
                         person={people.find(p => p.id === receipt.personId)}
                         onUpdate={(updates) => updateReceipt(receipt.id, updates)}
                         onUpdateItem={(itemId, updates) => updateItem(receipt.id, itemId, updates)}
+                        onUpdateReceipt={updateReceipt}
+                        onDeleteItem={(receiptId, itemId) => {
+                          const r = receipts.find(x => x.id === receiptId);
+                          if (r) updateReceipt(receiptId, { items: r.items.filter(it => it.id !== itemId) });
+                        }}
                         onDelete={() => deleteReceipt(receipt.id)}
                         draggable
                       />

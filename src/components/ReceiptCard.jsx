@@ -1,14 +1,44 @@
 import { useState } from 'react';
 import ItemRow from './ItemRow.jsx';
 import CardBadge from './CardBadge.jsx';
-import { formatCurrency, formatDate } from '../utils/formatters.js';
+import { formatCurrency, formatDate, uid } from '../utils/formatters.js';
 import styles from './ReceiptCard.module.css';
 
-export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, animationDelay = 0, draggable = false }) {
+export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, onUpdateReceipt, onDeleteItem, animationDelay = 0, draggable = false }) {
   const [expanded, setExpanded] = useState(true);
   const [showImage, setShowImage] = useState(false);
+  const [editingHeader, setEditingHeader] = useState(false);
+  const [headerData, setHeaderData] = useState({
+    store: receipt.store,
+    date: receipt.date || '',
+    total: receipt.total,
+  });
 
   const currency = receipt.currency || 'EUR';
+
+  const handleSaveHeader = () => {
+    onUpdateReceipt(receipt.id, {
+      store: headerData.store,
+      date: headerData.date,
+      total: Number(headerData.total),
+    });
+    setEditingHeader(false);
+  };
+
+  const handleAddItem = () => {
+    const newItem = {
+      id: uid(),
+      name: 'Nieuw product',
+      qty: 1,
+      unit_price: 0,
+      total_price: 0,
+      category: 'unknown',
+      link: null,
+    };
+    onUpdateReceipt(receipt.id, {
+      items: [...(receipt.items || []), newItem],
+    });
+  };
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData('receiptId', receipt.id);
@@ -42,21 +72,55 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
           </div>
           <div>
             <div className={styles.titleRow}>
-              <h3 className={styles.storeName}>{receipt.store}</h3>
+              {editingHeader ? (
+                <input
+                  className={`input ${styles.editInput}`}
+                  value={headerData.store}
+                  onChange={e => setHeaderData(p => ({ ...p, store: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter') handleSaveHeader(); if (e.key === 'Escape') setEditingHeader(false); }}
+                  autoFocus
+                  style={{ fontWeight: 600, width: '180px' }}
+                />
+              ) : (
+                <h3 className={styles.storeName}>{receipt.store}</h3>
+              )}
               {person && (
                 <span className={styles.personBadge} title={`Attached to ${person.name}`}>
                   {person.avatar} {person.name}
                 </span>
               )}
             </div>
-            <p className={styles.date}>{formatDate(receipt.date)}</p>
+            {editingHeader ? (
+              <input
+                className={`input ${styles.editInput}`}
+                type="date"
+                value={headerData.date}
+                onChange={e => setHeaderData(p => ({ ...p, date: e.target.value }))}
+                style={{ fontSize: '0.8rem', marginTop: '4px' }}
+              />
+            ) : (
+              <p className={styles.date}>{formatDate(receipt.date)}</p>
+            )}
           </div>
         </div>
 
         <div className={styles.headerRight}>
           <div className={styles.totalPill}>
-            <span className={styles.totalLabel}>Totaal</span>
-            <span className={styles.totalAmount}>{formatCurrency(receipt.total, currency)}</span>
+            {editingHeader ? (
+              <input
+                className={`input ${styles.editInput}`}
+                type="number"
+                step="0.01"
+                value={headerData.total}
+                onChange={e => setHeaderData(p => ({ ...p, total: e.target.value }))}
+                style={{ width: '90px', textAlign: 'right' }}
+              />
+            ) : (
+              <>
+                <span className={styles.totalLabel}>Totaal</span>
+                <span className={styles.totalAmount}>{formatCurrency(receipt.total, currency)}</span>
+              </>
+            )}
           </div>
           <CardBadge cardString={receipt.payment_card} small />
 
@@ -71,6 +135,37 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
               </svg>
             </button>
+          )}
+
+          {/* Edit / Save header button */}
+          {receipt.status !== 'processing' && (
+            editingHeader ? (
+              <>
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={handleSaveHeader}
+                  data-tooltip="Opslaan"
+                  style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+                >✓ Opslaan</button>
+                <button
+                  className="btn btn-ghost btn-sm btn-icon"
+                  onClick={() => setEditingHeader(false)}
+                  data-tooltip="Annuleren"
+                >✕</button>
+              </>
+            ) : (
+              <button
+                className="btn btn-ghost btn-icon btn-sm"
+                onClick={() => { setHeaderData({ store: receipt.store, date: receipt.date || '', total: receipt.total }); setEditingHeader(true); }}
+                id={`edit-header-${receipt.id}`}
+                data-tooltip="Bonnetje bewerken"
+              >
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 7.125L18 8.625" />
+                </svg>
+              </button>
+            )
           )}
 
           <button
@@ -131,6 +226,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
                     item={item}
                     currency={currency}
                     onUpdate={(updates) => onUpdateItem(receipt.id, item.id, updates)}
+                    onDelete={() => onDeleteItem && onDeleteItem(receipt.id, item.id)}
                   />
                 ))}
               </tbody>
@@ -141,6 +237,17 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
           <div className={styles.footer}>
             <div className={styles.footerLeft}>
               <span className={styles.itemCount}>{receipt.items?.length || 0} producten</span>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={handleAddItem}
+                style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                id={`add-item-${receipt.id}`}
+              >
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Product toevoegen
+              </button>
               {receipt.store_domain && (
                 <a
                   href={`https://${receipt.store_domain}`}
