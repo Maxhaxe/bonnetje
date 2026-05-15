@@ -152,13 +152,14 @@ export default function App() {
       const file = fileArray[i];
       setBatchProgress({ current: i + 1, total: fileArray.length });
       
+      let placeholderId = null;
       try {
         // 1. Upload to Supabase first
         const publicUrl = await uploadReceiptImage(file);
         const finalImageUrl = publicUrl || URL.createObjectURL(file);
 
         // 2. Create Placeholder
-        const placeholderId = uid();
+        placeholderId = uid();
         const placeholderReceipt = {
           id: placeholderId,
           store: 'Verwerken...',
@@ -204,10 +205,9 @@ export default function App() {
         }
       } catch (err) {
         setExtractError((prev) => prev ? `${prev} | ${file.name}: ${err.message}` : `${file.name}: ${err.message}`);
-        // Optionally update the placeholder to show an error state, or delete it. Let's mark it as error.
-        // We'll need the ID, but if it failed before placeholder was created, we can't.
-        // If we know it failed after placeholder:
-        // updateReceipt(placeholderId, { store: 'Fout bij scannen', status: 'error' });
+        if (placeholderId) {
+          updateReceipt(placeholderId, { store: 'Fout bij scannen', status: 'error' });
+        }
       }
     }
     

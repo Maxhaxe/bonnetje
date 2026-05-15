@@ -22,9 +22,10 @@ export function useReceipts() {
         const cloudData = await fetchFromSupabase();
         if (cloudData) {
           console.log('Syncing from Supabase...');
-          setReceipts(cloudData.receipts || []);
+          const cleanedReceipts = (cloudData.receipts || []).map(r => r.status === 'processing' ? { ...r, status: 'error', store: 'Fout bij verwerken (gestopt)' } : r);
+          setReceipts(cleanedReceipts);
           setPeople(cloudData.people || DEFAULT_PEOPLE);
-          await saveToStore('receipts', cloudData.receipts || []);
+          await saveToStore('receipts', cleanedReceipts);
           await saveToStore('people', cloudData.people || DEFAULT_PEOPLE);
           setIsLoaded(true);
           return;
@@ -55,16 +56,18 @@ export function useReceipts() {
 
           if (migratedReceipts.length > 0 || migratedPeople.length > 1) {
             console.log('Migrating data to IndexedDB...');
-            await saveToStore('receipts', migratedReceipts);
+            const cleanedMigrated = migratedReceipts.map(r => r.status === 'processing' ? { ...r, status: 'error', store: 'Fout bij verwerken (gestopt)' } : r);
+            await saveToStore('receipts', cleanedMigrated);
             await saveToStore('people', migratedPeople);
-            setReceipts(migratedReceipts);
+            setReceipts(cleanedMigrated);
             setPeople(migratedPeople);
             setIsLoaded(true);
             return;
           }
         }
 
-        setReceipts(dbReceipts);
+        const cleanedDbReceipts = dbReceipts.map(r => r.status === 'processing' ? { ...r, status: 'error', store: 'Fout bij verwerken (gestopt)' } : r);
+        setReceipts(cleanedDbReceipts);
         if (dbPeople.length > 0) setPeople(dbPeople);
         setIsLoaded(true);
       } catch (error) {

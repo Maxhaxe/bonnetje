@@ -110,7 +110,7 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
       )}
 
       {/* Items table */}
-      {expanded && receipt.status !== 'processing' && (
+      {expanded && receipt.status !== 'processing' && receipt.status !== 'error' && (
         <div className={styles.body}>
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
@@ -185,6 +185,14 @@ export default function ReceiptCard({ receipt, person, onDelete, onUpdateItem, a
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Bonnetje wordt gescand met AI...</span>
+        </div>
+      {/* Error State */}
+      {expanded && receipt.status === 'error' && (
+        <div className={styles.body} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', gap: '1rem', color: 'var(--accent-danger)' }}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Kon het bonnetje niet verwerken. Je kunt deze verwijderen.</span>
         </div>
       )}
     </article>
