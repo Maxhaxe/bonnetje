@@ -14,6 +14,9 @@ const LS_KEY = 'bonnetje_apikey';
 const LS_SB_URL = 'bonnetje_sb_url';
 const LS_SB_KEY = 'bonnetje_sb_key';
 
+const DEFAULT_SB_URL = 'https://joummsvaeprtzbpizdtl.supabase.co';
+const DEFAULT_SB_KEY = 'sb_publishable_zKbYN3ekzmiBT_S-G-Dt3w_eOxDXq3x';
+
 function loadApiKey() {
   try {
     return localStorage.getItem(LS_KEY) || DEFAULT_API_KEY;
@@ -25,11 +28,11 @@ function loadApiKey() {
 function loadSbConfig() {
   try {
     return {
-      url: localStorage.getItem(LS_SB_URL) || '',
-      key: localStorage.getItem(LS_SB_KEY) || ''
+      url: localStorage.getItem(LS_SB_URL) || DEFAULT_SB_URL,
+      key: localStorage.getItem(LS_SB_KEY) || DEFAULT_SB_KEY
     };
   } catch {
-    return { url: '', key: '' };
+    return { url: DEFAULT_SB_URL, key: DEFAULT_SB_KEY };
   }
 }
 
