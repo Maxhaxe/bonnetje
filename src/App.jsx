@@ -6,8 +6,8 @@ import SettingsModal from './components/SettingsModal.jsx';
 import ManualEntryModal from './components/ManualEntryModal.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
-import { formatCurrency } from './utils/formatters.js';
-import { initSupabase } from './utils/supabase.js';
+import { formatCurrency, uid } from './utils/formatters.js';
+import { initSupabase, uploadReceiptImage } from './utils/supabase.js';
 import styles from './App.module.css';
 
 const DEFAULT_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -153,24 +153,61 @@ export default function App() {
       setBatchProgress({ current: i + 1, total: fileArray.length });
       
       try {
-        const receipt = await extractReceipt(file);
+        // 1. Upload to Supabase first
+        const publicUrl = await uploadReceiptImage(file);
+        const finalImageUrl = publicUrl || URL.createObjectURL(file);
+
+        // 2. Create Placeholder
+        const placeholderId = uid();
+        const placeholderReceipt = {
+          id: placeholderId,
+          store: 'Verwerken...',
+          status: 'processing',
+          imageUrl: finalImageUrl,
+          date: new Date().toISOString().split('T')[0],
+          items: [],
+          subtotal: 0,
+          discount: 0,
+          tax: 0,
+          total: 0,
+          payment_card: null,
+          payment_method: 'unknown',
+          currency: 'EUR',
+          store_domain: null,
+          personId: selectedPersonId || 'p1',
+          processedAt: new Date().toISOString()
+        };
+
+        // Add to state & sync immediately so other devices see "processing"
+        addReceipt(placeholderReceipt);
+
+        // 3. Scan the image on the background
+        const scannedData = await extractReceipt(file);
         
-        // Duplicate check
-        const existing = checkDuplicate(receipt);
+        // Duplicate check (optional, but let's keep it simple and just warn, we don't delete the placeholder yet unless they cancel)
+        const existing = checkDuplicate(scannedData);
         if (existing) {
           const proceed = confirm(
-            `Potential Duplicate detected!\n\nA receipt from "${receipt.store}" on ${receipt.date} for ${receipt.total} ${receipt.currency} already exists.\n\nDo you want to add it anyway?`
+            `Potential Duplicate detected!\n\nA receipt from "${scannedData.store}" on ${scannedData.date} for ${scannedData.total} ${scannedData.currency} already exists.\n\nDo you want to update it anyway?`
           );
-          if (!proceed) continue;
+          if (!proceed) {
+            deleteReceipt(placeholderId);
+            continue;
+          }
         }
 
-        addReceipt(receipt);
+        // 4. Update the placeholder with real data
+        updateReceipt(placeholderId, { ...scannedData, status: 'completed' });
         
         if (i < fileArray.length - 1) {
           await sleep(1500);
         }
       } catch (err) {
         setExtractError((prev) => prev ? `${prev} | ${file.name}: ${err.message}` : `${file.name}: ${err.message}`);
+        // Optionally update the placeholder to show an error state, or delete it. Let's mark it as error.
+        // We'll need the ID, but if it failed before placeholder was created, we can't.
+        // If we know it failed after placeholder:
+        // updateReceipt(placeholderId, { store: 'Fout bij scannen', status: 'error' });
       }
     }
     

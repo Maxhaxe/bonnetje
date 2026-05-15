@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { GEMINI_VISION_MODEL, GEMINI_TEXT_MODEL, buildReceiptPrompt, buildProductLinkPrompt } from '../utils/geminiPrompt.js';
 import { resolveBestLink, buildSearchUrl } from '../utils/linkGenerator.js';
 import { uid } from '../utils/formatters.js';
-import { uploadReceiptImage } from '../utils/supabase.js';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1/models';
 
@@ -244,12 +243,7 @@ export function useGemini(apiKey, useServerSideScanning = true) {
         receiptData.items = items;
       }
 
-      // Try to upload to Supabase Storage permanently
-      const publicUrl = await uploadReceiptImage(imageFile);
-      const finalImageUrl = publicUrl || URL.createObjectURL(imageFile);
-
       return {
-        id: receiptData.id || uid(),
         store: receiptData.store || 'Unknown Store',
         date: receiptData.date || null,
         items: receiptData.items || [],
@@ -261,8 +255,6 @@ export function useGemini(apiKey, useServerSideScanning = true) {
         payment_method: receiptData.payment_method || 'unknown',
         currency: receiptData.currency || 'EUR',
         store_domain: receiptData.store_domain || null,
-        imageUrl: finalImageUrl,
-        processedAt: new Date().toISOString(),
       };
     } catch (err) {
       let msg = err.message;
