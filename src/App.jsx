@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import UploadZone from './components/UploadZone.jsx';
 import ReceiptCard from './components/ReceiptCard.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import ManualEntryModal from './components/ManualEntryModal.jsx';
+import InboxQueue from './components/InboxQueue.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
+import { useInboxPoller } from './hooks/useInboxPoller.js';
 import { formatCurrency, uid } from './utils/formatters.js';
 import { initSupabase, uploadReceiptImage } from './utils/supabase.js';
 import styles from './App.module.css';
@@ -216,6 +218,33 @@ export default function App() {
     setBatchProgress(null);
   };
 
+  // Inbox poller callback — called when Supabase inbox has a new file
+  const handleInboxFile = useCallback(async (file, meta) => {
+    let publicUrl = meta.publicUrl || null;
+    const placeholderId = uid();
+    addReceipt({
+      id: placeholderId,
+      store: `Inbox: ${meta.name}`,
+      status: 'processing',
+      imageUrl: publicUrl,
+      date: new Date().toISOString().split('T')[0],
+      items: [], subtotal: 0, discount: 0, tax: 0, total: 0,
+      payment_card: null, payment_method: 'unknown', currency: 'EUR',
+      store_domain: null, processedAt: new Date().toISOString(),
+    });
+    try {
+      const scannedData = await extractReceipt(file);
+      updateReceipt(placeholderId, { ...scannedData, status: 'completed', imageUrl: publicUrl });
+    } catch (err) {
+      updateReceipt(placeholderId, { store: 'Fout bij scannen (inbox)', status: 'error' });
+    }
+  }, [extractReceipt, addReceipt, updateReceipt]);
+
+  const { isPolling, lastCheck, inboxCount, triggerNow } = useInboxPoller({
+    onNewFile: handleInboxFile,
+    enabled: !!(supabaseUrl && supabaseKey),
+  });
+
   // Filtered receipts for display
   const displayReceipts = selectedPersonId 
     ? receipts.filter(r => r.personId === selectedPersonId)
@@ -245,6 +274,15 @@ export default function App() {
               Bonnetjes
               {receipts.length > 0 && (
                 <span className={styles.badge}>{receipts.length}</span>
+              )}
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === 'inbox' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('inbox')}
+            >
+              📥 Inbox
+              {inboxCount > 0 && (
+                <span className={styles.badge} style={{ background: '#6c63ff' }}>{inboxCount}</span>
               )}
             </button>
             <button
@@ -317,6 +355,31 @@ export default function App() {
                       <button className={styles.errorClose} onClick={() => setExtractError(null)}>✕</button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Inbox Tab */}
+              {activeTab === 'inbox' && (
+                <div className={styles.uploadSection}>
+                  <div style={{ marginBottom: 'var(--space-md)' }}>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>📥 Inbox</h2>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                      Sleep meerdere bonnetjesfoto's hiernaartoe. Ze worden automatisch één voor één gescand.
+                      {supabaseUrl && supabaseKey && (
+                        <> · De app kijkt ook elke 30 seconden in je <code>receipts/inbox/</code> map in Supabase Storage.
+                          {isPolling && <span style={{ marginLeft: '8px', color: '#6c63ff' }}>⚡ Bezig...</span>}
+                          {lastCheck && !isPolling && <span style={{ marginLeft: '8px', opacity: 0.6 }}>Laatste check: {lastCheck.toLocaleTimeString('nl-NL')}</span>}
+                          <button className="btn btn-ghost btn-sm" style={{ marginLeft: '8px', fontSize: '0.75rem' }} onClick={triggerNow}>Nu controleren</button>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                  <InboxQueue
+                    extractReceipt={extractReceipt}
+                    addReceipt={addReceipt}
+                    updateReceipt={updateReceipt}
+                    onProcessed={() => setActiveTab('receipts')}
+                  />
                 </div>
               )}
 
