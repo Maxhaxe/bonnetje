@@ -364,24 +364,19 @@ export default function App() {
                   <div style={{ marginBottom: 'var(--space-md)' }}>
                     <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>📥 Inbox</h2>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                      Sleep meerdere bonnetjesfoto's hiernaartoe. Ze worden automatisch één voor één gescand.
-                      {supabaseUrl && supabaseKey && (
-                        <> · De app kijkt ook elke 30 seconden in je <code>receipts/inbox/</code> map in Supabase Storage.
-                          {isPolling && <span style={{ marginLeft: '8px', color: '#6c63ff' }}>⚡ Bezig...</span>}
-                          {lastCheck && !isPolling && <span style={{ marginLeft: '8px', opacity: 0.6 }}>Laatste check: {lastCheck.toLocaleTimeString('nl-NL')}</span>}
-                          <button className="btn btn-ghost btn-sm" style={{ marginLeft: '8px', fontSize: '0.75rem' }} onClick={triggerNow}>Nu controleren</button>
-                        </>
-                      )}
+                      Sleep één of meerdere bonnetjesfoto's hiernaartoe of klik om bestanden te kiezen.
+                      De bonnetjes worden automatisch één voor één gescand.
                     </p>
                   </div>
                   <InboxQueue
                     extractReceipt={extractReceipt}
                     addReceipt={addReceipt}
                     updateReceipt={updateReceipt}
-                    onProcessed={() => setActiveTab('receipts')}
+                    onProcessed={() => setTimeout(() => setActiveTab('receipts'), 1000)}
                   />
                 </div>
               )}
+
 
               {activeTab === 'dashboard' && (
                 receipts.length === 0 ? (
