@@ -3,6 +3,7 @@ import UploadZone from './components/UploadZone.jsx';
 import ReceiptCard from './components/ReceiptCard.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
+import ManualEntryModal from './components/ManualEntryModal.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
 import { formatCurrency } from './utils/formatters.js';
@@ -49,6 +50,7 @@ export default function App() {
   const [supabaseKey, setSupabaseKey] = useState(initialSbKey);
   
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [manualModalOpen, setManualModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('receipts');
   const [extractError, setExtractError] = useState(null);
   const [batchProgress, setBatchProgress] = useState(null);
@@ -237,6 +239,15 @@ export default function App() {
                   )}
                   <UploadZone onUpload={handleUpload} loading={loading} />
 
+                  <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-md)' }}>
+                    <button 
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setManualModalOpen(true)}
+                    >
+                      ➕ Handmatig toevoegen
+                    </button>
+                  </div>
+
                   {extractError && (
                     <div className={styles.errorBanner} role="alert">
                       <span className={styles.errorMsg}>{extractError}</span>
@@ -395,6 +406,13 @@ export default function App() {
             setPeople(importedPeople);
           }}
           onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
+      {manualModalOpen && (
+        <ManualEntryModal
+          onAdd={(receipt) => addReceipt(receipt)}
+          onClose={() => setManualModalOpen(false)}
         />
       )}
     </div>
