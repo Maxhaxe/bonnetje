@@ -19,8 +19,18 @@ const DEFAULT_SB_URL = 'https://joummsvaeprtzbpizdtl.supabase.co';
 const DEFAULT_SB_KEY = 'sb_publishable_zKbYN3ekzmiBT_S-G-Dt3w_eOxDXq3x';
 
 function loadApiKey() {
+  const OLD_KEYS = [
+    'AIzaSyC5ocIg1-Ct4uLfnmp7FVR1MZIm2g-6F4U',
+    // voeg hier meer oude sleutels toe indien nodig
+  ];
+  
   try {
-    return localStorage.getItem(LS_KEY) || DEFAULT_API_KEY;
+    const saved = localStorage.getItem(LS_KEY);
+    // Als er geen opgeslagen sleutel is, of het is een oude standaard sleutel, gebruik de nieuwe
+    if (!saved || OLD_KEYS.includes(saved)) {
+      return DEFAULT_API_KEY;
+    }
+    return saved;
   } catch {
     return DEFAULT_API_KEY;
   }
