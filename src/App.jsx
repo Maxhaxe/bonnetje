@@ -4,10 +4,9 @@ import ReceiptCard from './components/ReceiptCard.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import SettingsModal from './components/SettingsModal.jsx';
 import ManualEntryModal from './components/ManualEntryModal.jsx';
-import InboxQueue from './components/InboxQueue.jsx';
+import StagingArea from './components/StagingArea.jsx';
 import { useReceipts } from './hooks/useReceipts.js';
 import { useGemini } from './hooks/useGemini.js';
-import { useInboxPoller } from './hooks/useInboxPoller.js';
 import { formatCurrency, uid } from './utils/formatters.js';
 import { initSupabase, uploadReceiptImage } from './utils/supabase.js';
 import styles from './App.module.css';
@@ -218,32 +217,7 @@ export default function App() {
     setBatchProgress(null);
   };
 
-  // Inbox poller callback — called when Supabase inbox has a new file
-  const handleInboxFile = useCallback(async (file, meta) => {
-    let publicUrl = meta.publicUrl || null;
-    const placeholderId = uid();
-    addReceipt({
-      id: placeholderId,
-      store: `Inbox: ${meta.name}`,
-      status: 'processing',
-      imageUrl: publicUrl,
-      date: new Date().toISOString().split('T')[0],
-      items: [], subtotal: 0, discount: 0, tax: 0, total: 0,
-      payment_card: null, payment_method: 'unknown', currency: 'EUR',
-      store_domain: null, processedAt: new Date().toISOString(),
-    });
-    try {
-      const scannedData = await extractReceipt(file);
-      updateReceipt(placeholderId, { ...scannedData, status: 'completed', imageUrl: publicUrl });
-    } catch (err) {
-      updateReceipt(placeholderId, { store: 'Fout bij scannen (inbox)', status: 'error' });
-    }
-  }, [extractReceipt, addReceipt, updateReceipt]);
-
-  const { isPolling, lastCheck, inboxCount, triggerNow } = useInboxPoller({
-    onNewFile: handleInboxFile,
-    enabled: !!(supabaseUrl && supabaseKey),
-  });
+  const { isPolling, lastCheck, inboxCount, triggerNow } = { isPolling: false, lastCheck: null, inboxCount: 0, triggerNow: () => {} };
 
   // Filtered receipts for display
   const displayReceipts = selectedPersonId 
@@ -277,13 +251,10 @@ export default function App() {
               )}
             </button>
             <button
-              className={`${styles.tab} ${activeTab === 'inbox' ? styles.tabActive : ''}`}
-              onClick={() => setActiveTab('inbox')}
+              className={`${styles.tab} ${activeTab === 'upload' ? styles.tabActive : ''}`}
+              onClick={() => setActiveTab('upload')}
             >
-              📥 Inbox
-              {inboxCount > 0 && (
-                <span className={styles.badge} style={{ background: '#6c63ff' }}>{inboxCount}</span>
-              )}
+              📂 Uploaden
             </button>
             <button
               className={`${styles.tab} ${activeTab === 'dashboard' ? styles.tabActive : ''}`}
@@ -358,25 +329,18 @@ export default function App() {
                 </div>
               )}
 
-              {/* Inbox Tab */}
-              {activeTab === 'inbox' && (
+              {/* Upload/Staging Tab */}
+              {activeTab === 'upload' && (
                 <div className={styles.uploadSection}>
                   <div style={{ marginBottom: 'var(--space-md)' }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>📥 Inbox</h2>
+                    <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '4px' }}>📂 Foto's uploaden</h2>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                      Sleep één of meerdere bonnetjesfoto's hiernaartoe of klik om bestanden te kiezen.
-                      De bonnetjes worden automatisch één voor één gescand.
+                      Upload foto's van bonnetjes. Selecteer daarna welke je wilt verwerken en klik op "Verwerken".
                     </p>
                   </div>
-                  <InboxQueue
-                    extractReceipt={extractReceipt}
-                    addReceipt={addReceipt}
-                    updateReceipt={updateReceipt}
-                    onProcessed={() => setTimeout(() => setActiveTab('receipts'), 1000)}
-                  />
+                  <StagingArea onProcess={(files) => { handleUpload(files); setActiveTab('receipts'); }} />
                 </div>
               )}
-
 
               {activeTab === 'dashboard' && (
                 receipts.length === 0 ? (
